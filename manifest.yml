@@ -1,0 +1,9 @@
+---
+applications:
+- name: edu-msa-board
+  memory: 1024M
+  host: edu-msa-board
+  path: ./target/edu-msa-board-1.0.0.war
+  buildpack: java_buildpack
+env:
+  JAVA_OPTS: -Djava.security.egd=file:///dev/urandom

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="paasta.msa.service.impl.BoardMapper">
+
+	<select id="getBoardCount" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			COUNT(*) AS COUNT
+		FROM TB_BOARD
+		<where>
+			<if test="searchType != null and searchType.equals('boardTitle')">
+				<if test="searchValue != null and !searchValue.equals('')">
+					board_title like CONCAT('%', #{searchValue}, '%')
+				</if>
+			</if>
+			<if test="searchType != null and searchType.equals('boardText')">
+				<if test="searchValue != null and !searchValue.equals('')">
+					board_text like CONCAT('%', #{searchValue}, '%')
+				</if>
+			</if>
+			<if test="searchType != null and searchType.equals('writeUserName')">
+				<if test="searchValue != null and !searchValue.equals('')">
+					write_user_name = #{searchValue}
+				</if>
+			</if>
+		</where>
+	</select>
+
+	<select id="getBoardList" parameterType="hashMap" resultType="hashMap">
+		SELECT FORMAT(boardNo, 0) AS boardNo
+				, boardSeq
+				, boardTitle
+				, boardText
+				, writeUserId
+				, writeUserName
+				, createDt
+				, updateDt 
+		FROM (
+			SELECT * FROM (
+				SELECT
+					(@ROWNUM := @ROWNUM + 1) AS boardNo
+					, board_seq			AS boardSeq
+					, board_title		AS boardTitle
+					, board_text		AS boardText
+					, write_user_id		AS writeUserId
+					, write_user_name	AS writeUserName
+					, DATE_FORMAT(create_dt,'%Y-%m-%d %H:%i:%s')		AS createDt
+					, DATE_FORMAT(update_dt,'%Y-%m-%d %H:%i:%s')		AS updateDt
+				FROM TB_BOARD, (SELECT @ROWNUM := 0) AS R
+				<where>
+					<if test="searchType != null and searchType.equals('boardTitle')">
+						<if test="searchValue != null and !searchValue.equals('')">
+							board_title like CONCAT('%', #{searchValue}, '%')
+						</if>
+					</if>
+					<if test="searchType != null and searchType.equals('boardText')">
+						<if test="searchValue != null and !searchValue.equals('')">
+							board_text like CONCAT('%', #{searchValue}, '%')
+						</if>
+					</if>
+					<if test="searchType != null and searchType.equals('writeUserName')">
+						<if test="searchValue != null and !searchValue.equals('')">
+							write_user_name = #{searchValue}
+						</if>
+					</if>
+				</where>
+				) AS DATA
+				ORDER BY boardNo DESC
+			) AS RESULT
+			LIMIT #{pagePerCount} OFFSET #{offset}
+	</select>
+
+	<select id="getBoard" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			board_seq			AS boardSeq
+			, board_title		AS boardTitle
+			, board_text		AS boardText
+			, write_user_id		AS writeUserId
+			, write_user_name	AS writeUserName
+			, DATE_FORMAT(create_dt,'%Y-%m-%d %H:%i:%s')		AS createDt
+			, DATE_FORMAT(update_dt,'%Y-%m-%d %H:%i:%s')		AS updateDt
+		FROM TB_BOARD
+		WHERE
+			board_seq = #{boardSeq}
+	</select>
+
+	<insert id="postBoard" parameterType="hashMap" useGeneratedKeys="true" keyProperty="boardSeq">
+		INSERT INTO TB_BOARD
+		(
+			board_title
+			, board_text
+			, write_user_id
+			, write_user_name
+			, create_dt
+			, update_dt
+		) VALUES (
+			#{boardTitle}
+			, #{boardText}
+			, #{writeUserId}
+			, #{writeUserName}
+			, now()
+			, now()
+		)
+	</insert>
+
+	<update id="putBoard" parameterType="hashMap">
+		UPDATE TB_BOARD
+		<set>
+			<if test="boardTitle != null and !boardTitle.equals('')">
+				board_title = #{boardTitle},
+			</if>
+			<if test="boardText != null and !boardText.equals('')">
+				board_text = #{boardText},
+			</if>
+			update_dt = now()
+		</set>
+		WHERE board_seq = #{boardSeq}
+		AND	  write_user_id = #{writeUserId}
+	</update>
+
+	<delete id="deleteBoard" parameterType="hashMap">
+		DELETE FROM TB_BOARD
+		WHERE board_seq = #{boardSeq}
+		AND write_user_id = #{writeUserId}
+	</delete>
+
+</mapper>
