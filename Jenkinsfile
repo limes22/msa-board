@@ -1,7 +1,3 @@
-import static java.util.UUID.randomUUID
-def uuid = randomUUID() as String
-def myid = uuid.take(8)
-
 pipeline {
   environment {
     APP_VER = "v1.0.${BUILD_ID}"
