@@ -25,6 +25,8 @@ pipeline {
         steps {
             dir("${env.WORKSPACE}") {
                 sh '''
+                    git clone https://github.com/limes22/msa-board.git
+                    cd msa-board
                     mvn package -f pom.xml
                     docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
                 '''
