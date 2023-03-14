@@ -23,13 +23,11 @@ pipeline {
         when { expression { return params.BUILD_DOCKER_IMAGE } }
         agent any
         steps {
-            dir("${env.WORKSPACE}") {
-                sh '''
-                    git clone https://github.com/limes22/msa-board.git
-                    cd msa-board
-                    mvn package -f pom.xml
-                    docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
-                '''
+            container('maven') {
+                      echo sh(script: 'env|sort', returnStdout: true)
+                      sh """
+                        mvn -B -ntp -T 2 package -DskipTests -DAPP_VERSION=${APP_VER}
+                        """
             }
         }
         post {
