@@ -21,7 +21,7 @@ pipeline {
   stages {
     stage('============ Build Docker Image ============') {
         when { expression { return params.BUILD_DOCKER_IMAGE } }
-        agent { label 'build' }
+        agent any
         steps {
             dir("${env.WORKSPACE}") {
                 sh '''
@@ -38,7 +38,7 @@ pipeline {
     }
     stage('============ Run test code ============') {
         when { expression { return params.RUN_TEST } }
-        agent { label 'build' }
+        agent any
         steps {
             sh'''
                 docker login --username howdi2000 --password dufrms@0418
